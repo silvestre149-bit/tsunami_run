@@ -3,10 +3,9 @@ import random
 
 # Configurações iniciais
 width, height = 800, 600
-cell_size = 3
+cell_size = 4
 grid_width, grid_height = width // cell_size, height // cell_size
-max_water_amount = 40
-block_size = 50
+max_water_amount = 50
 
 # Inicializando o Pygame
 pygame.init()
@@ -16,12 +15,13 @@ clock = pygame.time.Clock()
 # Criando a grade e preenchendo com água
 grid = [[random.randint(0, max_water_amount) for _ in range(grid_width)] for _ in range(grid_height)]
 
-# Adicionando o bloco à simulação
-block_x, block_y = grid_width // 2, 0
-block_speed = 1
+# Adicionando bloco
+block = pygame.Rect(grid_width // 2 * cell_size, 0, cell_size, cell_size)
+block_falling = True
+block_speed = 100
 
-# Função para atualizar a grade e o bloco
-def update_grid_and_block(grid, block_x, block_y):
+# Função para atualizar a grade
+def update_grid(grid):
     new_grid = [[0 for _ in range(grid_width)] for _ in range(grid_height)]
 
     for y in range(grid_height - 1, -1, -1):
@@ -47,28 +47,21 @@ def update_grid_and_block(grid, block_x, block_y):
                 # Mantenha o restante da água na célula atual
                 new_grid[y][x] += water_amount
 
-    # Atualizar a posição do bloco e gerar uma onda na superfície da água
-    block_y += block_speed
-    if block_y >= grid_height * cell_size - block_size:
-        block_y = grid_height * cell_size - block_size
-    else:
-        grid_y = block_y // cell_size
-        for y in range(grid_y - 1, grid_y + 2):
-            for x in range(block_x - block_size // cell_size // 2, block_x + block_size // cell_size // 2 + 1):
-                if 0 <= y < grid_height and 0 <= x < grid_width:
-                    new_grid[y][x] = min(max_water_amount, new_grid[y][x] + 5)
+    return new_grid
 
-    return new_grid, block_x, block_y
-
-    # Função para desenhar a grade e o bloco na tela
-def draw_grid_and_block(grid, block_x, block_y, screen):
+# Função para desenhar a grade na tela
+def draw_grid(grid, screen):
     for y in range(grid_height):
         for x in range(grid_width):
             water_amount = grid[y][x]
             color = (0, 0, min(255, 100 + water_amount * 3))
             pygame.draw.rect(screen, color, (x * cell_size, y * cell_size, cell_size, cell_size))
 
-    pygame.draw.rect(screen, (150, 75, 0), (block_x * cell_size, block_y, block_size, block_size))
+def check_block_collision(grid, block):
+    block_cell_x, block_cell_y = block.x // cell_size, block.y // cell_size
+    if block_cell_y < grid_height - 1 and grid[block_cell_y + 1][block_cell_x] > 0:
+        return True
+    return False
 
 # Loop principal do jogo
 running = True
@@ -78,12 +71,21 @@ while running:
         if event.type == pygame.QUIT:
             running = False
 
-    # Atualizando a grade e o bloco
-    grid, block_x, block_y = update_grid_and_block(grid, block_x, block_y)
+    # Atualizando a posição do bloco
+    if block_falling:
+        if check_block_collision(grid, block):
+            block_falling = False
+            grid[block.y // cell_size][block.x // cell_size] -= 10  # Propagação da energia na superfície da água
+        else:
+            block.y += block_speed
+
+    # Atualizando a grade
+    grid = update_grid(grid)
 
     # Desenhando a grade e o bloco na tela
     screen.fill((255, 255, 255))
-    draw_grid_and_block(grid, block_x, block_y, screen)
+    draw_grid(grid, screen)
+    pygame.draw.rect(screen, (255, 0, 0), block)
     pygame.display.flip()
 
     # Limitando a taxa de quadros
