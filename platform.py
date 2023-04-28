@@ -31,7 +31,8 @@ class Player:
         self.vel_x = 0
         self.vel_y = 0
         self.is_jumping = False
-        self.rect = pygame.Rect(self.x, self.y, self.width, self.height)
+        self.image = pygame.image.load("/home/silvestre/Área de trabalho/Faculdade/Jogos/tsunami/plataformas/3 Objects/3 Power lines/4.png").convert_alpha()
+        self.rect = self.image.get_rect(x=self.x, y=self.y)
 
     def move(self, keys_pressed, platforms):
         if keys_pressed[K_a]:
@@ -68,7 +69,7 @@ class Player:
                     self.is_jumping = False
 
     def draw(self, surface):
-        pygame.draw.rect(surface, (255, 0, 0), self.rect)
+        surface.blit(self.image, self.rect)
 
 class Platform:
     def __init__(self, x, y):
