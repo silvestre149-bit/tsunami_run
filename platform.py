@@ -11,6 +11,12 @@ WINDOW_HEIGHT = 600
 # Define a cor de fundo da janela
 BACKGROUND_COLOR = (255, 255, 255)
 
+# Carrega a imagem de fundo
+background_image = pygame.image.load('/home/silvestre/Área de trabalho/Faculdade/Jogos/tsunami/plataformas/2 Background/Night/2.png')
+
+# Transforma a imagem para o tamanho da janela
+background_image = pygame.transform.scale(background_image, (WINDOW_WIDTH, WINDOW_HEIGHT))
+
 # Define a velocidade do jogador e a velocidade da gravidade
 PLAYER_SPEED = 5
 GRAVITY = 0.4
@@ -30,7 +36,7 @@ class Player:
         self.vel_x = 0
         self.vel_y = 0
         self.is_jumping = False
-        self.image = pygame.image.load("/home/silvestre/Área de trabalho/Faculdade/Jogos/tsunami/tsunami_run/sprite_0.png").convert_alpha()
+        self.image = pygame.image.load("./sprite_0.png").convert_alpha()
         self.height = self.image.get_height()
         self.rect = self.image.get_rect(x=self.x, y=self.y)
 
@@ -68,32 +74,6 @@ class Player:
                     self.vel_y = 0
                     self.is_jumping = False
                             
- 
-        # Verifica a colisão do jogador com o chão
-        # if self.rect.colliderect(ground.rect):
-        #     if self.vel_y > 0 and self.rect.bottom <= ground.rect.top + self.height/2:
-        #         self.is_jumping = False
-        #         self.rect.bottom = ground.rect.top
-        #         self.vel_y = 0
-        #     else:
-        #         self.rect.top = ground.rect.bottom
-        #         self.is_jumping = True
-        #         self.vel_y = 0
-
-        # # Verifica a colisão do jogador com as plataformas
-        #     for platform in platforms + [ground]:
-        #         if self.rect.colliderect(platform.rect):
-        #             if self.vel_y > 0 and self.rect.bottom <= platform.rect.top + self.height/2:
-        #                 self.is_jumping = False
-        #                 self.rect.bottom = platform.rect.top
-        #                 self.vel_y = 0
-        #             else:
-        #                 self.rect.top = platform.rect.bottom
-        #                 self.is_jumping = True
-        #                 self.vel_y = 0
-        #             break
-
-
 
     def draw(self, surface):
         surface.blit(self.image, self.rect)
@@ -141,6 +121,7 @@ while True:
 
     player.move(keys_pressed, platforms)
 
+    window.blit(background_image,(0,0))
     window.fill(BACKGROUND_COLOR)
 
     #Desenha o chão
