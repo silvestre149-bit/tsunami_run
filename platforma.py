@@ -121,9 +121,10 @@ while True:
 
     player.move(keys_pressed, platforms)
 
-    window.blit(background_image,(0,0))
+    
     window.fill(BACKGROUND_COLOR)
-
+    window.blit(background_image,(0,0))
+    
     #Desenha o chão
     ground.draw(window)
 
