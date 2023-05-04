@@ -12,7 +12,7 @@ WINDOW_HEIGHT = 600
 BACKGROUND_COLOR = (255, 255, 255)
 
 # Carrega a imagem de fundo
-background_image = pygame.image.load('/home/silvestre/Área de trabalho/Faculdade/Jogos/tsunami/plataformas/2 Background/Night/2.png')
+background_image = pygame.image.load('2.png')
 
 # Transforma a imagem para o tamanho da janela
 background_image = pygame.transform.scale(background_image, (WINDOW_WIDTH, WINDOW_HEIGHT))
@@ -36,7 +36,7 @@ class Player:
         self.vel_x = 0
         self.vel_y = 0
         self.is_jumping = False
-        self.image = pygame.image.load("./sprite_0.png").convert_alpha()
+        self.image = pygame.image.load("sprite_0.png").convert_alpha()
         self.height = self.image.get_height()
         self.rect = self.image.get_rect(x=self.x, y=self.y)
 
@@ -92,7 +92,7 @@ class Platform:
 class Ground(Platform):
     def __init__(self):
         super().__init__(0, WINDOW_HEIGHT - 10)  # Chama o construtor da classe Platform
-        self.image = pygame.image.load("/home/silvestre/Área de trabalho/Faculdade/Jogos/tsunami/plataformas/1 Tiles/Tile_37.png").convert_alpha()
+        self.image = pygame.image.load("Tile_37.png").convert_alpha()
         self.image = pygame.transform.scale(self.image, (WINDOW_WIDTH, self.image.get_height()))
         self.rect = self.image.get_rect(x=self.x, y=WINDOW_HEIGHT - self.height)
 
