@@ -36,21 +36,37 @@ class Player:
         self.vel_x = 0
         self.vel_y = 0
         self.is_jumping = False
-        self.image = pygame.image.load("sprite_0.png").convert_alpha()
+        self.standing_images = [pygame.image.load("sprite_0.png").convert_alpha()]
+        self.walk_right_images = [pygame.image.load("sprite_3.png").convert_alpha()]
+        self.walk_left_images = [pygame.image.load("sprite_2.png").convert_alpha()]
+        self.jump_images = [pygame.image.load("sprite_1.png").convert_alpha()]
+        self.image = self.standing_images[0]
         self.height = self.image.get_height()
         self.rect = self.image.get_rect(x=self.x, y=self.y)
+        self.animation_counter_right = 0
+        self.animation_counter_left = 0
 
     def move(self, keys_pressed, platforms):
         if keys_pressed[K_a]:
             self.vel_x = -PLAYER_SPEED
+            self.image = self.walk_left_images[self.animation_counter_left // 5 % len(self.walk_left_images)]
+            self.animation_counter_left += 1
+            self.animation_counter_right = 0
         elif keys_pressed[K_d]:
             self.vel_x = PLAYER_SPEED
+            self.image = self.walk_right_images[self.animation_counter_right // 5 % len(self.walk_right_images)]
+            self.animation_counter_right += 1
+            self.animation_counter_left = 0
         else:
             self.vel_x = 0
+            self.image = self.standing_images[0]
+            self.animation_counter_left = 0
+            self.animation_counter_right = 0
 
         if keys_pressed[K_w] and not self.is_jumping:
             self.is_jumping = True
             self.vel_y = -JUMP_FORCE
+            self.image = self.jump_images[0]
 
         self.vel_y += GRAVITY
 
@@ -65,6 +81,7 @@ class Player:
             self.is_jumping = False
             self.y = WINDOW_HEIGHT - self.height - 1
             self.vel_y = 0
+            self.image = self.standing_images[0]
 
         # Verifica a colisão do jogador com as plataformas
         for platform in platforms:
