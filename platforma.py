@@ -57,16 +57,15 @@ class Player:
             self.image = self.walk_right_images[self.animation_counter_right // 5 % len(self.walk_right_images)]
             self.animation_counter_right += 1
             self.animation_counter_left = 0
+        elif keys_pressed[K_w] and not self.is_jumping:
+            self.is_jumping = True
+            self.vel_y = -JUMP_FORCE
+            self.image = self.jump_images[0]
         else:
             self.vel_x = 0
             self.image = self.standing_images[0]
             self.animation_counter_left = 0
             self.animation_counter_right = 0
-
-        if keys_pressed[K_w] and not self.is_jumping:
-            self.is_jumping = True
-            self.vel_y = -JUMP_FORCE
-            self.image = self.jump_images[0]
 
         self.vel_y += GRAVITY
 
