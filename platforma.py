@@ -9,7 +9,7 @@ WINDOW_WIDTH = 800
 WINDOW_HEIGHT = 600
 
 # Define a cor de fundo da janela
-BACKGROUND_COLOR = (255, 255, 255)
+BACKGROUND_COLOR = pygame.image.load('back.jpg')
 
 # Carrega a imagem de fundo
 background_image = pygame.image.load('2.png')
@@ -87,7 +87,7 @@ class Platform:
         self.rect = pygame.Rect(self.x, self.y, self.width, self.height)
 
     def draw(self, surface):
-        pygame.draw.rect(surface, (0, 0, 255), self.rect)
+        pygame.draw.rect(surface, (255, 255, 0), self.rect)
 
 class Ground(Platform):
     def __init__(self):
@@ -122,7 +122,7 @@ while True:
     player.move(keys_pressed, platforms)
 
     
-    window.fill(BACKGROUND_COLOR)
+    window.blit(BACKGROUND_COLOR,(0,0))
     window.blit(background_image,(0,0))
     
     #Desenha o chão
