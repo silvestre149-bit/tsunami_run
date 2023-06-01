@@ -18,14 +18,14 @@ pygame.display.set_caption("Tsunami Run")
 
 # set frame rate
 clock = pygame.time.Clock()
-FPS = 60
+FPS = 45
 
 target = 10
 acrescimo = -10
 
 # game variables
 SCROLL_THRESH = 200
-GRAVITY = 1
+GRAVITY = 0.9
 MAX_PLATFORMS = 10
 scroll = 0
 game_over = False
@@ -60,8 +60,12 @@ platform_image = pygame.transform.scale(platform_image, (SCREEN_WIDTH, SCREEN_HE
 pygame.mixer.music.load("assets/RUST.mp3")
 jump = pygame.mixer.Sound("assets/jump.mp3")
 death = pygame.mixer.Sound("assets/death.mp3")
+won = pygame.mixer.Sound("assets/win.mp3")
+lose = pygame.mixer.Sound("assets/lose.mp3")
 splash = pygame.mixer.Sound("assets/splash.mp3")
+land = pygame.mixer.Sound("assets/land.mp3")
 jump.set_volume(1)
+land.set_volume(0.05)
 
 text_ouline_color = (255, 150, 0)
 text_color = (255, 255, 210)
@@ -103,7 +107,7 @@ class WaterSpring:
         self.dampening = 0.005  # adjust accordingly
         self.tension = 0.05
         self.height = self.target_height
-        self.vel = 0
+        self.vel = -5
         self.x = x
 
     def update(self):
@@ -186,7 +190,8 @@ class Player:
         self.sprites_jump_air_left = [pygame.transform.flip(sprite, True, False) for sprite in self.sprites_jump_air_right]
         self.sprites_jump_fall_right = [sprites[6]]
         self.sprites_jump_fall_left = [pygame.transform.flip(sprite, True, False) for sprite in self.sprites_jump_fall_right]
-        self.sprites_jump_land = [sprites[7]]
+        self.sprites_jump_land_right = [sprites[7]]
+        self.sprites_jump_land_left = [pygame.transform.flip(sprite, True, False) for sprite in self.sprites_jump_land_right]
         self.image = self.sprite_stand[0]  # Imagem padrão é a sprite parado
         self.current_sprite_list = self.sprite_stand
         self.current_sprite_index = 0
@@ -199,6 +204,8 @@ class Player:
         self.can_jump = False  # Initialize the can_jump variable
         self.jumping = False
         self.falling = False
+        self.land_counter = 0
+        self.land_sound = False
 
     def move(self):
         # reset variables
@@ -221,6 +228,7 @@ class Player:
             jump.play()
             self.can_jump = False  # Set can_jump to False after jumping
             self.jumping = True
+            self.land_sound = False
             score += 1 
         else:
             # Se o jogador não estiver se movendo, use a última direção para determinar para qual direção olhar
@@ -247,9 +255,19 @@ class Player:
                 self.current_sprite_list = self.sprites_jump_fall_left
         # If player is falling
         if self.falling and self.can_jump:
-            self.current_sprite_list = self.sprites_jump_land
-            self.jumping = False
-            self.falling = False
+            if self.land_sound == False:
+                land.play()
+                self.land_sound = True
+            if self.last_direction == 'right':
+                self.current_sprite_list = self.sprites_jump_land_right
+            elif self.last_direction == 'left':
+                self.current_sprite_list = self.sprites_jump_land_left
+            if self.land_counter >= 30:
+                self.jumping = False
+                self.falling = False
+                self.land_counter = 0
+            self.land_counter += 1
+            
 
         self.current_sprite_index += 1
         self.current_sprite_index %= len(self.current_sprite_list)  # Certifique-se de que o índice está sempre dentro do intervalo
@@ -397,7 +415,7 @@ while run:
             game_over = True
             splash.play()
         
-        if counter == 10:
+        if counter == 5:
             wave.add_height(acrescimo)
             counter = 0
         counter += 1
@@ -423,6 +441,7 @@ while run:
         draw_text("Você Venceu!", font_big, text_color, SCREEN_WIDTH // 2, SCREEN_HEIGHT // 2 - 100, center=True)
         draw_text("SCORE: " + str(score), font_small, text_color, SCREEN_WIDTH // 2, SCREEN_HEIGHT // 2 - 50, center=True)
         draw_text("Pressione ESPAÇO para reiniciar", font_small, text_color, SCREEN_WIDTH // 2, SCREEN_HEIGHT // 2, center=True)
+        won.play()
 
         key = pygame.key.get_pressed()
         if key[pygame.K_SPACE]:
@@ -457,6 +476,7 @@ while run:
             draw_text("GAME OVER!", font_big, text_color, SCREEN_WIDTH // 2, SCREEN_HEIGHT // 2 - 100, center=True)
             draw_text("SCORE: " + str(score), font_small, text_color, SCREEN_WIDTH // 2, SCREEN_HEIGHT // 2 - 50, center=True)
             draw_text("Pressione ESPAÇO para reiniciar", font_small, text_color, SCREEN_WIDTH // 2, SCREEN_HEIGHT // 2, center=True)
+            lose.play()
 
         key = pygame.key.get_pressed()
         if key[pygame.K_SPACE]:
