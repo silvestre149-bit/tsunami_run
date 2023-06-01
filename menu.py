@@ -86,7 +86,6 @@ def iniciar_jogo1():
     subprocess.run([sys.executable, "game.py"] + dificuldade)
     pygame.mixer.music.play()
     # Fecha o menu.py
-    sys.exit()
 
 def iniciar_jogo2():
     dificuldade = ['50', '-10', '(0,0,255,50)', '2']
@@ -95,7 +94,6 @@ def iniciar_jogo2():
     subprocess.run([sys.executable, "game.py"] + dificuldade)
     pygame.mixer.music.play()
     # Fecha o menu.py
-    sys.exit()
 
 def iniciar_jogo3():
     dificuldade = ['100', '-15', '(255,0,0,50)', '3']
@@ -104,7 +102,6 @@ def iniciar_jogo3():
     subprocess.run([sys.executable, "game.py"] + dificuldade)
     pygame.mixer.music.play()
     # Fecha o menu.py
-    sys.exit()
 
 def mostrar_como_jogar():
     exibir_menu_como_jogar()
