@@ -65,17 +65,19 @@ lose = pygame.mixer.Sound("assets/lose.mp3")
 splash = pygame.mixer.Sound("assets/splash.mp3")
 land = pygame.mixer.Sound("assets/land.mp3")
 tsunami = pygame.mixer.Sound("assets/tsunami.mp3")
-jump.set_volume(1)
+jump.set_volume(1.5)
 lose.set_volume(0.2)
 won.set_volume(0.2)
 land.set_volume(0.1)
 tsunami.set_volume(0.09)
 
-text_ouline_color = (255, 150, 0)
+text_outline_color = (255, 150, 0)
 text_color = (255, 255, 210)
+score_outline_color = (50, 50, 50)
+score_color = (200, 200, 200)
 BLACK = (0,0,0)
 
-def draw_text(text, font, text_col, x, y, center=False, outline_color=text_ouline_color):
+def draw_text(text, font, text_col, x, y, outline_color, center=False, right_align=False):
     # Renderiza o texto principal
     img = font.render(text, True, text_col)
     
@@ -86,6 +88,8 @@ def draw_text(text, font, text_col, x, y, center=False, outline_color=text_oulin
     rect = img.get_rect()
     if center:
         rect.center = (x, y)
+    elif right_align:
+        rect.topright = (x, y)
     else:
         rect.topleft = (x, y)
 
@@ -95,6 +99,7 @@ def draw_text(text, font, text_col, x, y, center=False, outline_color=text_oulin
 
     # Desenha o texto principal por cima do contorno
     screen.blit(img, rect)
+
 
 
 # function for drawing the background
@@ -341,9 +346,9 @@ class Platform(pygame.sprite.Sprite):
 
 def draw_score_and_target():
     # render score
-    draw_text(f'Score: {score}', font_small, text_color, SCREEN_WIDTH//2, 20, center=True)
+    draw_text(f'Score: {score}', font_small, score_color, 10, 20, score_outline_color)
     # render target
-    draw_text(f'Target: {target}', font_small, text_color, SCREEN_WIDTH//2, 50, center=True)
+    draw_text(f'Objetivo: {target}', font_small, score_color, SCREEN_WIDTH - 10, 20, score_outline_color, right_align=True)
 
 
 water_scroll = 0
@@ -444,9 +449,9 @@ while run:
             for y in range(0, SCREEN_HEIGHT//100, 2):
                 pygame.draw.rect(screen, BLACK, (0, y * 100, fade_counter, 100))
                 pygame.draw.rect(screen, BLACK, (SCREEN_WIDTH - fade_counter, (y + 1) * 100, fade_counter, 100))
-        draw_text("Você Venceu!", font_big, text_color, SCREEN_WIDTH // 2, SCREEN_HEIGHT // 2 - 100, center=True)
-        draw_text("SCORE: " + str(score), font_small, text_color, SCREEN_WIDTH // 2, SCREEN_HEIGHT // 2 - 50, center=True)
-        draw_text("Pressione ESPAÇO para reiniciar", font_small, text_color, SCREEN_WIDTH // 2, SCREEN_HEIGHT // 2, center=True)
+        draw_text("Você Venceu!", font_big, text_color, SCREEN_WIDTH // 2, SCREEN_HEIGHT // 2 - 100, text_outline_color, center=True)
+        draw_text("SCORE: " + str(score), font_small, text_color, SCREEN_WIDTH // 2, SCREEN_HEIGHT // 2 - 50, text_outline_color, center=True)
+        draw_text("Pressione ESPAÇO para reiniciar", font_small, text_color, SCREEN_WIDTH // 2, SCREEN_HEIGHT // 2, text_outline_color, center=True)
         if played == False:
             won.play()
             played = True
@@ -482,9 +487,9 @@ while run:
             for y in range(0, SCREEN_HEIGHT//100, 2):
                 pygame.draw.rect(screen, BLACK, (0, y * 100, fade_counter, 100))
                 pygame.draw.rect(screen, BLACK, (SCREEN_WIDTH - fade_counter, (y + 1) * 100, fade_counter, 100))
-            draw_text("GAME OVER!", font_big, text_color, SCREEN_WIDTH // 2, SCREEN_HEIGHT // 2 - 100, center=True)
-            draw_text("SCORE: " + str(score), font_small, text_color, SCREEN_WIDTH // 2, SCREEN_HEIGHT // 2 - 50, center=True)
-            draw_text("Pressione ESPAÇO para reiniciar", font_small, text_color, SCREEN_WIDTH // 2, SCREEN_HEIGHT // 2, center=True)
+            draw_text("GAME OVER!", font_big, text_color, SCREEN_WIDTH // 2, SCREEN_HEIGHT // 2 - 100, text_outline_color, center=True)
+            draw_text("SCORE: " + str(score), font_small, text_color, SCREEN_WIDTH // 2, SCREEN_HEIGHT // 2 - 50, text_outline_color, center=True)
+            draw_text("Pressione ESPAÇO para reiniciar", font_small, text_color, SCREEN_WIDTH // 2, SCREEN_HEIGHT // 2, text_outline_color, center=True)
             if played == False:
                 lose.play()
                 played = True
