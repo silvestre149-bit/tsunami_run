@@ -68,6 +68,9 @@ lose = pygame.mixer.Sound("assets/lose.mp3")
 splash = pygame.mixer.Sound("assets/splash.mp3")
 land = pygame.mixer.Sound("assets/land.mp3")
 tsunami = pygame.mixer.Sound("assets/tsunami.mp3")
+click = pygame.mixer.Sound("assets/click.mp3")
+hover = pygame.mixer.Sound("assets/hover.mp3")
+hover.set_volume(0.5)
 jump.set_volume(1.5)
 lose.set_volume(0.2)
 won.set_volume(0.2)
@@ -79,6 +82,29 @@ text_color = (200, 200, 200)
 score_outline_color = (50, 50, 50)
 score_color = (200, 200, 200)
 wait_bg = (0,0,100)
+
+def tela_intro(dificuldade):
+    intro = True
+    if dificuldade == 1:
+        bg_intro = pygame.image.load('assets/nivel1.png')
+    if dificuldade == 2:
+        bg_intro = pygame.image.load('assets/nivel2.png')
+    if dificuldade == 3:
+        bg_intro = pygame.image.load('assets/nivel3.png')
+    bg_intro = pygame.transform.scale(bg_intro, (SCREEN_WIDTH, SCREEN_HEIGHT))
+
+    while intro:
+        for event in pygame.event.get():
+            if event.type == pygame.QUIT:
+                pygame.quit()
+                quit()
+            if event.type == pygame.KEYDOWN or event.type == pygame.MOUSEBUTTONDOWN:
+                intro = False
+
+        screen.blit(bg_intro, (0, 0))
+        pygame.display.update()
+        clock.tick(15)  # Controla o número de frames por segundo da tela de introdução
+
 
 def draw_text(text, font, text_col, x, y, outline_color, center=False, right_align=False):
     # Renderiza o texto principal
@@ -362,6 +388,7 @@ class Botao:
         self.cor_fundo = cor_fundo
         self.cor_texto = cor_texto
         self.acao = acao
+        self.played = False
 
     def desenhar(self, tela, borda, pos_mouse):
         pygame.draw.rect(tela, self.cor_fundo, (self.x, self.y, self.largura, self.altura))
@@ -377,9 +404,16 @@ class Botao:
 
         if self.x < pos_mouse[0] < self.x + self.largura and self.y < pos_mouse[1] < self.y + self.altura:
             pygame.draw.rect(tela, self.cor_texto, (self.x, self.y, self.largura, self.altura), 4)
+            self.cor = (4, 125, 155)
+            if self.played == False:
+                hover.play()
+                self.played = True     
+        else:
+            self.played = False
 
     def executar_acao(self):
         if self.acao is not None:
+            click.play()
             self.acao()
 
 class GameOverMenu:
@@ -416,7 +450,6 @@ class GameOverMenu:
         screen.blit(s, (0, 0))
         wave.draw_line(screen)
         wave = Wave()
-        played = False
         s = pygame.Surface(screen.get_size(), pygame.SRCALPHA).convert_alpha()
 
     def ir_para_menu(self):
@@ -460,9 +493,12 @@ game_over_menu = GameOverMenu(screen, SCREEN_WIDTH, SCREEN_HEIGHT)
 fade_image = pygame.Surface((SCREEN_WIDTH, SCREEN_HEIGHT))  # Crie uma imagem do tamanho da tela
 fade_image.fill((0, 0, 0))  # Preencha com preto (ou outra cor de sua escolha)
 
+tela_intro(int(sys.argv[4]))
+
 while run:
     clock.tick(FPS)
     if game_over == False:
+        played = False
         scroll, score_temp = jumpy.move()
         score += score_temp
         water_scroll -= scroll
@@ -542,13 +578,12 @@ while run:
             # Aumente o contador
             fade_counter += 0.8
         # chamada para exibir o menu de fim de jogo
-        game_over_menu.exibir()
-
-        draw_text("Você Venceu!", font_big, text_color, SCREEN_WIDTH // 2, SCREEN_HEIGHT // 2 - 100, text_outline_color, center=True)
-        draw_text("SCORE: " + str(score), font_small, text_color, SCREEN_WIDTH // 2, SCREEN_HEIGHT // 2 - 50, text_outline_color, center=True)
         if played == False:
             won.play()
             played = True
+        game_over_menu.exibir()
+        draw_text("Você Venceu!", font_big, text_color, SCREEN_WIDTH // 2, SCREEN_HEIGHT // 2 - 100, text_outline_color, center=True)
+        draw_text("SCORE: " + str(score), font_small, text_color, SCREEN_WIDTH // 2, SCREEN_HEIGHT // 2 - 50, text_outline_color, center=True)
 
     else:
         if fade_counter < SCREEN_WIDTH:
@@ -561,13 +596,12 @@ while run:
             # Aumente o contador
             fade_counter += 0.8
         # chamada para exibir o menu de fim de jogo
-        game_over_menu.exibir()
-
-        draw_text("GAME OVER!", font_big, text_color, SCREEN_WIDTH // 2, SCREEN_HEIGHT // 2 - 100, text_outline_color, center=True)
-        draw_text("SCORE: " + str(score), font_small, text_color, SCREEN_WIDTH // 2, SCREEN_HEIGHT // 2 - 50, text_outline_color, center=True)
         if played == False:
             lose.play()
             played = True
+        game_over_menu.exibir()
+        draw_text("GAME OVER!", font_big, text_color, SCREEN_WIDTH // 2, SCREEN_HEIGHT // 2 - 100, text_outline_color, center=True)
+        draw_text("SCORE: " + str(score), font_small, text_color, SCREEN_WIDTH // 2, SCREEN_HEIGHT // 2 - 50, text_outline_color, center=True)
 
     # event handler
     for event in pygame.event.get():

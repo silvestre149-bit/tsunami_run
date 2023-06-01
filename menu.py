@@ -12,7 +12,7 @@ altura_tela = 800
 tela = pygame.display.set_mode((largura_tela, altura_tela))
 pygame.display.set_caption("Escapando do Tsunami")
 
-cor_fundo = (0, 0, 0)  # preto
+cor_fundo = (20, 20, 20)  # preto
 background = pygame.image.load("assets/background.png")
 background = pygame.transform.scale(background, (largura_tela, altura_tela))
 click = pygame.mixer.Sound("assets/click.mp3")
@@ -23,7 +23,7 @@ pygame.mixer.init()
 
 pygame.mixer.music.set_volume(0.1)
 pygame.mixer.music.play(-1)
-cor_texto = (255, 255, 255)  # branco
+cor_texto = (200, 200, 200)  # branco
 
 class Botao:
     def __init__(self, x, y, largura, altura, cor, texto, acao=None):
@@ -56,7 +56,7 @@ class Botao:
 
         fonte = pygame.font.Font("assets/LuckiestGuy-Regular.ttf", 28)
         texto = fonte.render(self.texto, True, cor_fundo)
-        pos_texto = texto.get_rect(center=(self.x + self.largura / 2, self.y + self.altura / 2))
+        pos_texto = texto.get_rect(center=(self.x + self.largura / 2, self.y + self.altura / 2 + 3))
         tela.blit(texto, pos_texto)
 
     def executar_acao(self):
@@ -81,7 +81,7 @@ def tratar_eventos_menu(botoes):
         botao.desenhar(tela, sprite_borda, pos_mouse)  # passar a posição do mouse para o método desenhar do botão
 
 def iniciar_jogo1():
-    dificuldade = ['30', '-5', '(0,255,255,50)']
+    dificuldade = ['30', '-5', '(0,255,255,50)', '1']
     # Executa o arquivo game.py
     pygame.mixer.music.stop()
     subprocess.run([sys.executable, "game.py"] + dificuldade)
@@ -89,7 +89,7 @@ def iniciar_jogo1():
     # Fecha o menu.py
 
 def iniciar_jogo2():
-    dificuldade = ['50', '-10', '(0,0,255,50)']
+    dificuldade = ['50', '-10', '(0,0,255,50)', '2']
     # Executa o arquivo game.py
     pygame.mixer.music.stop()
     subprocess.run([sys.executable, "game.py"] + dificuldade)
@@ -97,7 +97,7 @@ def iniciar_jogo2():
     # Fecha o menu.py
 
 def iniciar_jogo3():
-    dificuldade = ['100', '-15', '(255,0,0,50)']
+    dificuldade = ['100', '-15', '(255,0,0,50)', '3']
     # Executa o arquivo game.py
     pygame.mixer.music.stop()
     subprocess.run([sys.executable, "game.py"] + dificuldade)
