@@ -4,7 +4,6 @@ import pygame.mixer
 import subprocess
 import sys
 
-
 pygame.init()
 pygame.mixer.music.load("assets/RUST.mp3")
 largura_tela = 450
@@ -44,7 +43,7 @@ class Botao:
         cor = self.cor
         if self.x < pos_mouse[0] < self.x + self.largura and self.y < pos_mouse[1] < self.y + self.altura:
             cor = self.cor_hover
-            if self.played == False:
+            if not self.played:
                 hover.play()
                 self.played = True
 
@@ -68,7 +67,7 @@ def tratar_eventos_menu(botoes):
     for event in pygame.event.get():
         if event.type == QUIT:
             pygame.quit()
-            quit()
+            sys.exit()
         elif event.type == MOUSEBUTTONDOWN:
             if event.button == 1:
                 for botao in botoes:
@@ -87,6 +86,7 @@ def iniciar_jogo1():
     subprocess.run([sys.executable, "game.py"] + dificuldade)
     pygame.mixer.music.play()
     # Fecha o menu.py
+    sys.exit()
 
 def iniciar_jogo2():
     dificuldade = ['50', '-10', '(0,0,255,50)', '2']
@@ -95,6 +95,7 @@ def iniciar_jogo2():
     subprocess.run([sys.executable, "game.py"] + dificuldade)
     pygame.mixer.music.play()
     # Fecha o menu.py
+    sys.exit()
 
 def iniciar_jogo3():
     dificuldade = ['100', '-15', '(255,0,0,50)', '3']
@@ -103,9 +104,10 @@ def iniciar_jogo3():
     subprocess.run([sys.executable, "game.py"] + dificuldade)
     pygame.mixer.music.play()
     # Fecha o menu.py
-    
+    sys.exit()
+
 def mostrar_como_jogar():
-    print("Como jogar...")
+    exibir_menu_como_jogar()
 
 def mostrar_sobre():
     print("Sobre...")
@@ -160,6 +162,37 @@ def exibir_menu_niveis():
         tela.blit(sprite_fundo, (75, 150))  # Desenha a sprite de fundo atrás dos botões
         for botao in botoes_niveis:
             botao.desenhar(tela, sprite_borda, pygame.mouse.get_pos())  # Passar a posição do mouse para o método desenhar do botão
+        pygame.display.update()
+
+
+def exibir_menu_como_jogar():
+    tela.fill(cor_fundo)
+    sprite_fundo = pygame.image.load("assets/back_op.png")
+    sprite_fundo = pygame.transform.scale(sprite_fundo, (300, 375))
+    tela.blit(sprite_fundo, (75, 150))
+
+    fonte_como_jogar = pygame.font.Font("assets/LuckiestGuy-Regular.ttf", 12)
+    texto_como_jogar = fonte_como_jogar.render("Para jogar, utilize as teclas do teclado WASD", True, cor_texto)
+    pos_texto_como_jogar = texto_como_jogar.get_rect(center=(largura_tela // 2, 200))
+    tela.blit(texto_como_jogar, pos_texto_como_jogar)
+
+    texto_wasd = fonte_como_jogar.render("Conforme imagem abaixo:", True, cor_texto)
+    pos_texto_wasd = texto_wasd.get_rect(center=(largura_tela // 2, 225))
+    tela.blit(texto_wasd, pos_texto_wasd)
+
+    imagem_wasd = pygame.image.load("assets/wasd.png")
+    nova_largura = 275
+    nova_altura = 250
+    imagem_wasd = pygame.transform.scale(imagem_wasd, (nova_largura, nova_altura))
+    pos_imagem_wasd = imagem_wasd.get_rect(center=(largura_tela // 2, 375))
+    tela.blit(imagem_wasd, pos_imagem_wasd)
+
+    sprite_borda = pygame.image.load("assets/Button.png")
+    botao_voltar = Botao(125, 600, 200, 50, cor_texto, "Voltar", exibir_menu)
+    botao_voltar.desenhar(tela, sprite_borda, pygame.mouse.get_pos())
+
+    while True:
+        tratar_eventos_menu([botao_voltar])
         pygame.display.update()
 
 if __name__ == "__main__":
