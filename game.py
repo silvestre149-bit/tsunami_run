@@ -2,7 +2,7 @@
 import pygame
 import random
 import pygame.mixer
-import os
+import subprocess
 
 Point = pygame.Vector2
 # initialise pygame
@@ -71,11 +71,11 @@ won.set_volume(0.2)
 land.set_volume(0.1)
 tsunami.set_volume(0.09)
 
-text_outline_color = (255, 150, 0)
-text_color = (255, 255, 210)
+text_outline_color = (50, 50, 50)
+text_color = (200, 200, 200)
 score_outline_color = (50, 50, 50)
 score_color = (200, 200, 200)
-BLACK = (0,0,0)
+wait_bg = (0,0,100)
 
 def draw_text(text, font, text_col, x, y, outline_color, center=False, right_align=False):
     # Renderiza o texto principal
@@ -447,11 +447,12 @@ while run:
         if fade_counter < SCREEN_WIDTH:
             fade_counter += 5
             for y in range(0, SCREEN_HEIGHT//100, 2):
-                pygame.draw.rect(screen, BLACK, (0, y * 100, fade_counter, 100))
-                pygame.draw.rect(screen, BLACK, (SCREEN_WIDTH - fade_counter, (y + 1) * 100, fade_counter, 100))
+                pygame.draw.rect(screen, wait_bg, (0, y * 100, fade_counter, 100))
+                pygame.draw.rect(screen, wait_bg, (SCREEN_WIDTH - fade_counter, (y + 1) * 100, fade_counter, 100))
         draw_text("Você Venceu!", font_big, text_color, SCREEN_WIDTH // 2, SCREEN_HEIGHT // 2 - 100, text_outline_color, center=True)
         draw_text("SCORE: " + str(score), font_small, text_color, SCREEN_WIDTH // 2, SCREEN_HEIGHT // 2 - 50, text_outline_color, center=True)
         draw_text("Pressione ESPAÇO para reiniciar", font_small, text_color, SCREEN_WIDTH // 2, SCREEN_HEIGHT // 2, text_outline_color, center=True)
+        draw_text("Pressione M para retornar ao Menu", font_small, text_color, SCREEN_WIDTH // 2, SCREEN_HEIGHT // 2 + 50, text_outline_color, center=True)
         if played == False:
             won.play()
             played = True
@@ -485,11 +486,12 @@ while run:
         if fade_counter < SCREEN_WIDTH:
             fade_counter += 5
             for y in range(0, SCREEN_HEIGHT//100, 2):
-                pygame.draw.rect(screen, BLACK, (0, y * 100, fade_counter, 100))
-                pygame.draw.rect(screen, BLACK, (SCREEN_WIDTH - fade_counter, (y + 1) * 100, fade_counter, 100))
+                pygame.draw.rect(screen, wait_bg, (0, y * 100, fade_counter, 100))
+                pygame.draw.rect(screen, wait_bg, (SCREEN_WIDTH - fade_counter, (y + 1) * 100, fade_counter, 100))
             draw_text("GAME OVER!", font_big, text_color, SCREEN_WIDTH // 2, SCREEN_HEIGHT // 2 - 100, text_outline_color, center=True)
             draw_text("SCORE: " + str(score), font_small, text_color, SCREEN_WIDTH // 2, SCREEN_HEIGHT // 2 - 50, text_outline_color, center=True)
             draw_text("Pressione ESPAÇO para reiniciar", font_small, text_color, SCREEN_WIDTH // 2, SCREEN_HEIGHT // 2, text_outline_color, center=True)
+            draw_text("Pressione M para ir ao Menu", font_small, text_color, SCREEN_WIDTH // 2, SCREEN_HEIGHT // 2 + 50, text_outline_color, center=True)
             if played == False:
                 lose.play()
                 played = True
@@ -519,7 +521,10 @@ while run:
             wave = Wave()
             played = False
             s = pygame.Surface(screen.get_size(), pygame.SRCALPHA).convert_alpha()
-
+        if key[pygame.K_m]:
+            subprocess.call(["python", "menu.py"])
+            run = False
+            # retorna ao menu
     # event handler
     for event in pygame.event.get():
         if event.type == pygame.QUIT:
