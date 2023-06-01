@@ -9,7 +9,7 @@ pygame.mixer.music.load("assets/RUST.mp3")
 largura_tela = 450
 altura_tela = 800
 tela = pygame.display.set_mode((largura_tela, altura_tela))
-pygame.display.set_caption("Escapando do Tsunami")
+pygame.display.set_caption("Tsunami Run")
 
 cor_fundo = (20, 20, 20)  # preto
 background = pygame.image.load("assets/background.png")
@@ -124,6 +124,13 @@ def exibir_menu():
     botoes.append(botao_sobre)
     botoes.append(botao_sair)
 
+    pygame.font.init()  # inicialização do módulo de fontes do pygame
+    titulo_fonte = pygame.font.Font("assets/LuckiestGuy-Regular.ttf", 50)  # Carrega a fonte LuckiestGuy-Regular com o tamanho 50
+
+    texto_titulo = titulo_fonte.render("Tsunami Run", True, (50,50,50))
+    pos_texto_titulo = texto_titulo.get_rect(center=(largura_tela // 2, 100))  # define a posição do texto no centro da tela e 100 pixels abaixo do topo
+    tela.blit(texto_titulo, pos_texto_titulo)
+
     # Carregar a sprite de fundo dos botões
     sprite_fundo = pygame.image.load("assets/back_op.png")
     sprite_fundo = pygame.transform.scale(sprite_fundo, (300, 375))  # Ajustar o tamanho da sprite para cobrir os botões
@@ -131,6 +138,7 @@ def exibir_menu():
     while True:
         tratar_eventos_menu(botoes)
         tela.blit(background, (0, 0))  # Desenha a imagem de fundo na tela
+        tela.blit(texto_titulo, pos_texto_titulo) 
         tela.blit(sprite_fundo, (75, 150))  # Desenha a sprite de fundo atrás dos botões
         for botao in botoes:
             botao.desenhar(tela, sprite_borda, pygame.mouse.get_pos())  # Passar a posição do mouse para o método desenhar do botão
