@@ -64,8 +64,12 @@ won = pygame.mixer.Sound("assets/win.mp3")
 lose = pygame.mixer.Sound("assets/lose.mp3")
 splash = pygame.mixer.Sound("assets/splash.mp3")
 land = pygame.mixer.Sound("assets/land.mp3")
+tsunami = pygame.mixer.Sound("assets/tsunami.mp3")
 jump.set_volume(1)
-land.set_volume(0.05)
+lose.set_volume(0.2)
+won.set_volume(0.2)
+land.set_volume(0.1)
+tsunami.set_volume(0.09)
 
 text_ouline_color = (255, 150, 0)
 text_color = (255, 255, 210)
@@ -104,8 +108,8 @@ class WaterSpring:
             self.target_height = SCREEN_HEIGHT + 200
         else:
             self.target_height = target_height
-        self.dampening = 0.005  # adjust accordingly
-        self.tension = 0.05
+        self.dampening = 0.05  # adjust accordingly
+        self.tension = 0.1
         self.height = self.target_height
         self.vel = -5
         self.x = x
@@ -123,7 +127,7 @@ class WaterSpring:
 
 class Wave:
     def __init__(self):
-        diff = 10
+        diff = 20
         self.springs = [
             WaterSpring(x=i * diff + 0) for i in range(SCREEN_WIDTH // diff + 2)
         ]
@@ -359,9 +363,11 @@ s = pygame.Surface(screen.get_size(), pygame.SRCALPHA).convert_alpha()
 run = True
 counter = 0
 win = False
+played = False
 pygame.mixer.init()
-pygame.mixer.music.set_volume(0.05)
+pygame.mixer.music.set_volume(0.1)
 pygame.mixer.music.play(-1)
+tsunami.play(-1)
 
 while run:
     clock.tick(FPS)
@@ -372,19 +378,19 @@ while run:
         # draw background
         draw_bg()
 
-        if random.random() < 0.01:  # 1% chance each frame
+        if random.random() < 0.05:  # 1% chance each frame
             # Generate a random index for the left side of the screen
             left_index = 0
             # Generate a random velocity
-            left_vel = random.random() * (-50)
+            left_vel = random.random() * (-100)
             # Splash on the left side of the screen
             wave.splash(left_index, left_vel)
 
-        if random.random() < 0.01:  # 1% chance each frame
+        if random.random() < 0.05:  # 1% chance each frame
             # Generate a random index for the right side of the screen
-            right_index = 60
+            right_index = 40
             # Generate a random velocity
-            right_vel = random.random() * (-50)
+            right_vel = random.random() * (-400)
             # Splash on the right side of the screen
             wave.splash(right_index, right_vel)
 
@@ -441,7 +447,9 @@ while run:
         draw_text("Você Venceu!", font_big, text_color, SCREEN_WIDTH // 2, SCREEN_HEIGHT // 2 - 100, center=True)
         draw_text("SCORE: " + str(score), font_small, text_color, SCREEN_WIDTH // 2, SCREEN_HEIGHT // 2 - 50, center=True)
         draw_text("Pressione ESPAÇO para reiniciar", font_small, text_color, SCREEN_WIDTH // 2, SCREEN_HEIGHT // 2, center=True)
-        won.play()
+        if played == False:
+            won.play()
+            played = True
 
         key = pygame.key.get_pressed()
         if key[pygame.K_SPACE]:
@@ -466,6 +474,7 @@ while run:
             screen.blit(s, (0, 0))
             wave.draw_line(screen)
             wave = Wave()
+            played = False
             s = pygame.Surface(screen.get_size(), pygame.SRCALPHA).convert_alpha()
     else:
         if fade_counter < SCREEN_WIDTH:
@@ -476,7 +485,9 @@ while run:
             draw_text("GAME OVER!", font_big, text_color, SCREEN_WIDTH // 2, SCREEN_HEIGHT // 2 - 100, center=True)
             draw_text("SCORE: " + str(score), font_small, text_color, SCREEN_WIDTH // 2, SCREEN_HEIGHT // 2 - 50, center=True)
             draw_text("Pressione ESPAÇO para reiniciar", font_small, text_color, SCREEN_WIDTH // 2, SCREEN_HEIGHT // 2, center=True)
-            lose.play()
+            if played == False:
+                lose.play()
+                played = True
 
         key = pygame.key.get_pressed()
         if key[pygame.K_SPACE]:
@@ -501,6 +512,7 @@ while run:
             screen.blit(s, (0, 0))
             wave.draw_line(screen)
             wave = Wave()
+            played = False
             s = pygame.Surface(screen.get_size(), pygame.SRCALPHA).convert_alpha()
 
     # event handler
