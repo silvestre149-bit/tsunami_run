@@ -6,9 +6,7 @@ import sys
 
 
 pygame.init()
-#pygame.mixer.init()
-#pygame.mixer.music.load("assets/RUST.mp3")
-#pygame.mixer.music.play(-1)
+pygame.mixer.music.load("assets/RUST.mp3")
 largura_tela = 450
 altura_tela = 800
 tela = pygame.display.set_mode((largura_tela, altura_tela))
@@ -17,8 +15,14 @@ pygame.display.set_caption("Escapando do Tsunami")
 cor_fundo = (0, 0, 0)  # preto
 background = pygame.image.load("assets/background.png")
 background = pygame.transform.scale(background, (largura_tela, altura_tela))
+click = pygame.mixer.Sound("assets/click.mp3")
+hover = pygame.mixer.Sound("assets/hover.mp3")
+hover.set_volume(0.5)
 
+pygame.mixer.init()
 
+pygame.mixer.music.set_volume(0.1)
+pygame.mixer.music.play(-1)
 cor_texto = (255, 255, 255)  # branco
 
 class Botao:
@@ -31,6 +35,7 @@ class Botao:
         self.cor_hover = (4, 125, 155)  # cor de destaque
         self.texto = texto
         self.acao = acao
+        self.played = False
 
     def desenhar(self, tela, sprite_borda, pos_mouse):
         sprite_borda_redimensionada = pygame.transform.scale(sprite_borda, (self.largura, self.altura))
@@ -39,6 +44,12 @@ class Botao:
         cor = self.cor
         if self.x < pos_mouse[0] < self.x + self.largura and self.y < pos_mouse[1] < self.y + self.altura:
             cor = self.cor_hover
+            if self.played == False:
+                hover.play()
+                self.played = True
+
+        else:
+            self.played = False
 
         pygame.draw.rect(tela, cor, (self.x, self.y, self.largura, self.altura))
         pygame.draw.rect(tela, cor_fundo, (self.x, self.y, self.largura, self.altura), 2)
@@ -50,6 +61,7 @@ class Botao:
 
     def executar_acao(self):
         if self.acao:
+            click.play()
             self.acao()
 
 def tratar_eventos_menu(botoes):
