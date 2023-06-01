@@ -107,7 +107,8 @@ def mostrar_como_jogar():
     exibir_menu_como_jogar()
 
 def mostrar_sobre():
-    print("Sobre...")
+    exibir_menu_sobre()
+
 
 def exibir_menu():
     botoes = []
@@ -192,5 +193,46 @@ def exibir_menu_como_jogar():
         tratar_eventos_menu([botao_voltar])
         pygame.display.update()
 
+def exibir_menu_sobre():
+    tela.fill(cor_fundo)
+    sprite_fundo = pygame.image.load("assets/back_op.png")
+    sprite_fundo = pygame.transform.scale(sprite_fundo, (300, 375))
+    tela.blit(sprite_fundo, (75, 150))
+
+    fonte_sobre = pygame.font.Font("assets/LuckiestGuy-Regular.ttf", 15)
+    texto_sobre1 = fonte_sobre.render("Sobre o jogo:", True, cor_texto)
+    pos_texto_sobre1 = texto_sobre1.get_rect(center=(largura_tela // 2, 200))
+    tela.blit(texto_sobre1, pos_texto_sobre1)
+
+    texto_sobre2 = fonte_sobre.render("Tsunami run é um jogo de", True, cor_texto)
+    pos_texto_sobre2 = texto_sobre2.get_rect(center=(largura_tela // 2, 260))
+    tela.blit(texto_sobre2, pos_texto_sobre2)
+
+    texto_sobre3 = fonte_sobre.render("sobrevivência em que o jogador deve", True, cor_texto)
+    pos_texto_sobre3 = texto_sobre3.get_rect(center=(largura_tela // 2, 300))
+    tela.blit(texto_sobre3, pos_texto_sobre3)
+
+    texto_sobre4 = fonte_sobre.render("escapar de um tsunami destrutivo,", True, cor_texto)
+    pos_texto_sobre4 = texto_sobre4.get_rect(center=(largura_tela // 2, 340))
+    tela.blit(texto_sobre4, pos_texto_sobre4)
+
+    texto_sobre5 = fonte_sobre.render("pulando as plataformas.", True, cor_texto)
+    pos_texto_sobre5 = texto_sobre5.get_rect(center=(largura_tela // 2, 380))
+    tela.blit(texto_sobre5, pos_texto_sobre5)
+
+    sprite_borda = pygame.image.load("assets/Button.png")
+    botao_voltar = Botao(125, 600, 200, 50, cor_texto, "Voltar", exibir_menu)
+    botao_voltar.desenhar(tela, sprite_borda, pygame.mouse.get_pos())
+
+    while True:
+        tratar_eventos_menu([botao_voltar])
+        pygame.display.update()
+
 if __name__ == "__main__":
     exibir_menu()
+
+
+
+
+
+
