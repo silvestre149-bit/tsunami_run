@@ -1,7 +1,13 @@
 import pygame
 from pygame.locals import *
+import pygame.mixer
+import subprocess
+
 
 pygame.init()
+#pygame.mixer.init()
+#pygame.mixer.music.load("assets/RUST.mp3")
+#pygame.mixer.music.play(-1)
 largura_tela = 800
 altura_tela = 600
 tela = pygame.display.set_mode((largura_tela, altura_tela))
@@ -10,6 +16,7 @@ pygame.display.set_caption("Escapando do Tsunami")
 cor_fundo = (0, 0, 0)  # preto
 background = pygame.image.load("assets/back_blue.jpg")
 background = pygame.transform.scale(background, (largura_tela, altura_tela))
+
 
 cor_texto = (255, 255, 255)  # branco
 
@@ -20,13 +27,22 @@ class Botao:
         self.largura = largura
         self.altura = altura
         self.cor = cor
+        self.cor_hover = (4, 125, 155)  # cor de destaque
         self.texto = texto
         self.acao = acao
 
-    def desenhar(self, tela, sprite_borda):
+    def desenhar(self, tela, sprite_borda, pos_mouse):
         sprite_borda_redimensionada = pygame.transform.scale(sprite_borda, (self.largura, self.altura))
         tela.blit(sprite_borda_redimensionada, (self.x, self.y))
-        fonte = pygame.font.SysFont(None, 32)
+
+        cor = self.cor
+        if self.x < pos_mouse[0] < self.x + self.largura and self.y < pos_mouse[1] < self.y + self.altura:
+            cor = self.cor_hover
+
+        pygame.draw.rect(tela, cor, (self.x, self.y, self.largura, self.altura))
+        pygame.draw.rect(tela, cor_fundo, (self.x, self.y, self.largura, self.altura), 2)
+
+        fonte = pygame.font.Font("assets/Montserrat-Black.ttf", 28)
         texto = fonte.render(self.texto, True, cor_fundo)
         pos_texto = texto.get_rect(center=(self.x + self.largura / 2, self.y + self.altura / 2))
         tela.blit(texto, pos_texto)
@@ -46,8 +62,15 @@ def tratar_eventos_menu(botoes):
                     if botao.x < event.pos[0] < botao.x + botao.largura and botao.y < event.pos[1] < botao.y + botao.altura:
                         botao.executar_acao()
 
+    sprite_borda = pygame.image.load("assets/Button.png")
+    pos_mouse = pygame.mouse.get_pos()  # obter a posição do mouse
+    for botao in botoes:
+        botao.desenhar(tela, sprite_borda, pos_mouse)  # passar a posição do mouse para o método desenhar do botão
+
 def iniciar_jogo():
     print("Iniciando o jogo...")
+    subprocess.call(["python", "game.py"])
+
 
 def mostrar_como_jogar():
     print("Como jogar...")
@@ -78,7 +101,7 @@ def exibir_menu():
         tela.blit(background, (0, 0))  # Desenha a imagem de fundo na tela
         tela.blit(sprite_fundo, (250, 150))  # Desenha a sprite de fundo atrás dos botões
         for botao in botoes:
-            botao.desenhar(tela, sprite_borda)  # Passar a sprite de borda para o método desenhar do botão
+            botao.desenhar(tela, sprite_borda, pygame.mouse.get_pos())  # Passar a posição do mouse para o método desenhar do botão
         pygame.display.update()
 
 def exibir_menu_niveis():
@@ -104,7 +127,7 @@ def exibir_menu_niveis():
         tela.blit(background, (0, 0))  # Desenha a imagem de fundo na tela
         tela.blit(sprite_fundo, (250, 150))  # Desenha a sprite de fundo atrás dos botões
         for botao in botoes_niveis:
-            botao.desenhar(tela, sprite_borda)  # Passar a sprite de borda para o método desenhar do botão
+            botao.desenhar(tela, sprite_borda, pygame.mouse.get_pos())  # Passar a posição do mouse para o método desenhar do botão
         pygame.display.update()
 
 if __name__ == "__main__":

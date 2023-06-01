@@ -261,7 +261,7 @@ run = True
 counter = 0
 win = False
 pygame.mixer.init()
-pygame.mixer.music.load("assets/rust.mp3")
+pygame.mixer.music.load("assets/RUST.mp3")
 pygame.mixer.music.play(-1)
 while run:
     clock.tick(FPS)
