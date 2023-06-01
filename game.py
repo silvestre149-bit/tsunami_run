@@ -2,7 +2,8 @@ import sys
 import pygame
 import random
 import pygame.mixer
-import subprocess
+from pygame.locals import *
+import pygame.mixer
 
 Point = pygame.Vector2
 # initialise pygame
@@ -11,10 +12,6 @@ pygame.init()
 target = int(sys.argv[1])
 acrescimo = int(sys.argv[2])
 cor_agua = eval(sys.argv[3])
-
-# target = 10
-# acrescimo = -10
-# cor_agua = (0,0,255,200)
 
 # game window dimensions
 SCREEN_WIDTH = 450
@@ -111,44 +108,6 @@ def draw_text(text, font, text_col, x, y, outline_color, center=False, right_ali
 # function for drawing the background
 def draw_bg():
     screen.blit(bg_image, (0, 0))
-
-class Botao:
-    def __init__(self, x, y, largura, altura, cor, texto, acao=None):
-        self.x = x
-        self.y = y
-        self.largura = largura
-        self.altura = altura
-        self.cor = cor
-        self.cor_hover = (4, 125, 155)  # cor de destaque
-        self.texto = texto
-        self.acao = acao
-        self.played = False
-
-    def desenhar(self, tela, sprite_borda, pos_mouse):
-        sprite_borda_redimensionada = pygame.transform.scale(sprite_borda, (self.largura, self.altura))
-        tela.blit(sprite_borda_redimensionada, (self.x, self.y))
-
-        cor = self.cor
-        if self.x < pos_mouse[0] < self.x + self.largura and self.y < pos_mouse[1] < self.y + self.altura:
-            cor = self.cor_hover
-            if self.played == False:
-                self.played = True
-
-        else:
-            self.played = False
-
-        pygame.draw.rect(tela, cor, (self.x, self.y, self.largura, self.altura))
-        pygame.draw.rect(tela, text_color, (self.x, self.y, self.largura, self.altura), 2)
-
-        fonte = pygame.font.Font("assets/LuckiestGuy-Regular.ttf", 28)
-        texto = fonte.render(self.texto, True, text_color)
-        pos_texto = texto.get_rect(center=(self.x + self.largura / 2, self.y + self.altura / 2))
-        tela.blit(texto, pos_texto)
-
-    def executar_acao(self):
-        if self.acao:
-            self.acao()
-
 
 class WaterSpring:
     def __init__(self, x=0, target_height=None):
@@ -393,6 +352,87 @@ def draw_score_and_target():
     # render target
     draw_text(f'Objetivo: {target}', font_small, score_color, SCREEN_WIDTH - 10, 20, score_outline_color, right_align=True)
 
+class Botao:
+    def __init__(self, x, y, largura, altura, cor_texto, cor_fundo, texto, acao=None):
+        self.x = x
+        self.y = y
+        self.largura = largura
+        self.altura = altura
+        self.texto = texto
+        self.cor_fundo = cor_fundo
+        self.cor_texto = cor_texto
+        self.acao = acao
+
+    def desenhar(self, tela, borda, pos_mouse):
+        pygame.draw.rect(tela, self.cor_fundo, (self.x, self.y, self.largura, self.altura))
+        pygame.draw.rect(tela, self.cor_texto, (self.x, self.y, self.largura, self.altura), 2)
+
+
+        if borda:
+            tela.blit(borda, (self.x, self.y))
+
+        font = pygame.font.Font("assets/LuckiestGuy-Regular.ttf", 30)
+        text = font.render(self.texto, 1, self.cor_texto)
+        tela.blit(text, (self.x + (self.largura / 2 - text.get_width() / 2), self.y + (self.altura / 2 - text.get_height() / 2 + 3)))
+
+        if self.x < pos_mouse[0] < self.x + self.largura and self.y < pos_mouse[1] < self.y + self.altura:
+            pygame.draw.rect(tela, self.cor_texto, (self.x, self.y, self.largura, self.altura), 4)
+
+    def executar_acao(self):
+        if self.acao is not None:
+            self.acao()
+
+class GameOverMenu:
+    def __init__(self, tela, largura, altura):
+        self.tela = tela
+        self.largura = largura
+        self.altura = altura
+        self.cor_texto = (255, 255, 255)
+        self.cor_fundo = (10, 10, 10)
+        self.botao_reiniciar = Botao(self.largura / 2 - 100, self.altura / 2, 200, 50, self.cor_texto, self.cor_fundo,"Reiniciar", self.reiniciar_jogo)
+        self.botao_menu = Botao(self.largura / 2 - 100, self.altura / 2 + 70, 200, 50, self.cor_texto, self.cor_fundo, "Menu", self.ir_para_menu)
+        self.botoes = [self.botao_reiniciar, self.botao_menu]
+
+    def reiniciar_jogo(self):
+        # reset variables
+        global game_over, score, scroll, fade_counter, win, jumpy, platform_group, platform, wave, water_scroll, s
+        game_over = False
+        score = 0
+        scroll = 0
+        win = False
+        fade_counter = 0
+        # reposition jumpy
+        jumpy.rect.center = (SCREEN_WIDTH // 2, SCREEN_HEIGHT - 150)
+        # reset platforms
+        platform_group.empty()
+        # create starting platform
+        platform = Platform(SCREEN_WIDTH // 2 - 50, SCREEN_HEIGHT - 50, 100)
+        platform_group.add(platform)
+        wave.set_target_height(SCREEN_HEIGHT + 200)
+        water_scroll = 0
+        s.fill(0)
+        wave.update()
+        wave.draw(s)
+        screen.blit(s, (0, 0))
+        wave.draw_line(screen)
+        wave = Wave()
+        played = False
+        s = pygame.Surface(screen.get_size(), pygame.SRCALPHA).convert_alpha()
+
+    def ir_para_menu(self):
+        global run
+        run = False
+        # retorna ao menu
+
+    def exibir(self):
+        pos_mouse = pygame.mouse.get_pos()
+        for botao in self.botoes:
+            botao.desenhar(self.tela, None, pos_mouse)
+            if botao.x < pos_mouse[0] < botao.x + botao.largura and botao.y < pos_mouse[1] < botao.y + botao.altura:
+                for event in pygame.event.get():
+                    if event.type == pygame.MOUSEBUTTONDOWN:
+                        botao.executar_acao()
+
 
 water_scroll = 0
 # player instance
@@ -416,6 +456,9 @@ pygame.mixer.init()
 pygame.mixer.music.set_volume(0.1)
 pygame.mixer.music.play(-1)
 tsunami.play(-1)
+game_over_menu = GameOverMenu(screen, SCREEN_WIDTH, SCREEN_HEIGHT)
+fade_image = pygame.Surface((SCREEN_WIDTH, SCREEN_HEIGHT))  # Crie uma imagem do tamanho da tela
+fade_image.fill((0, 0, 0))  # Preencha com preto (ou outra cor de sua escolha)
 
 while run:
     clock.tick(FPS)
@@ -490,87 +533,42 @@ while run:
 
     elif(win == True):
         if fade_counter < SCREEN_WIDTH:
-            fade_counter += 5
-            for y in range(0, SCREEN_HEIGHT//100, 2):
-                pygame.draw.rect(screen, wait_bg, (0, y * 100, fade_counter, 100))
-                pygame.draw.rect(screen, wait_bg, (SCREEN_WIDTH - fade_counter, (y + 1) * 100, fade_counter, 100))
+            # Desenhe a imagem de fundo
+            screen.blit(bg_image, (0, 0))
+            # Ajuste a transparência da imagem de fade
+            fade_image.set_alpha(255 - fade_counter * 255 // SCREEN_WIDTH)  # A transparência vai de 255 (totalmente opaco) a 0 (totalmente transparente)
+            # Desenhe a imagem de fade sobre a imagem de fundo
+            screen.blit(fade_image, (0, 0))
+            # Aumente o contador
+            fade_counter += 0.8
+        # chamada para exibir o menu de fim de jogo
+        game_over_menu.exibir()
+
         draw_text("Você Venceu!", font_big, text_color, SCREEN_WIDTH // 2, SCREEN_HEIGHT // 2 - 100, text_outline_color, center=True)
         draw_text("SCORE: " + str(score), font_small, text_color, SCREEN_WIDTH // 2, SCREEN_HEIGHT // 2 - 50, text_outline_color, center=True)
-        draw_text("Pressione ESPAÇO para reiniciar", font_small, text_color, SCREEN_WIDTH // 2, SCREEN_HEIGHT // 2, text_outline_color, center=True)
-        draw_text("Pressione M para retornar ao Menu", font_small, text_color, SCREEN_WIDTH // 2, SCREEN_HEIGHT // 2 + 50, text_outline_color, center=True)
         if played == False:
             won.play()
             played = True
 
-        key = pygame.key.get_pressed()
-        if key[pygame.K_SPACE]:
-            # reset variables
-            game_over = False
-            score = 0
-            scroll = 0
-            fade_counter = 0
-            win = False
-            # reposition jumpy
-            jumpy.rect.center = (SCREEN_WIDTH // 2, SCREEN_HEIGHT - 150)
-            # reset platforms
-            platform_group.empty()
-            # create starting platform
-            platform = Platform(SCREEN_WIDTH // 2 - 50, SCREEN_HEIGHT - 50, 100)
-            platform_group.add(platform)
-            wave.set_target_height(SCREEN_HEIGHT + 200)
-            water_scroll = 0
-            s.fill(0)
-            wave.update()
-            wave.draw(s)
-            screen.blit(s, (0, 0))
-            wave.draw_line(screen)
-            wave = Wave()
-            played = False
-            s = pygame.Surface(screen.get_size(), pygame.SRCALPHA).convert_alpha()
     else:
         if fade_counter < SCREEN_WIDTH:
-            fade_counter += 5
-            for y in range(0, SCREEN_HEIGHT//100, 2):
-                pygame.draw.rect(screen, wait_bg, (0, y * 100, fade_counter, 100))
-                pygame.draw.rect(screen, wait_bg, (SCREEN_WIDTH - fade_counter, (y + 1) * 100, fade_counter, 100))
-            draw_text("GAME OVER!", font_big, text_color, SCREEN_WIDTH // 2, SCREEN_HEIGHT // 2 - 100, text_outline_color, center=True)
-            draw_text("SCORE: " + str(score), font_small, text_color, SCREEN_WIDTH // 2, SCREEN_HEIGHT // 2 - 50, text_outline_color, center=True)
-            draw_text("Pressione ESPAÇO para reiniciar", font_small, text_color, SCREEN_WIDTH // 2, SCREEN_HEIGHT // 2, text_outline_color, center=True)
-            draw_text("Pressione M para ir ao Menu", font_small, text_color, SCREEN_WIDTH // 2, SCREEN_HEIGHT // 2 + 50, text_outline_color, center=True)
-            if played == False:
-                lose.play()
-                played = True
+            # Desenhe a imagem de fundo
+            screen.blit(bg_image, (0, 0))
+            # Ajuste a transparência da imagem de fade
+            fade_image.set_alpha(255 - fade_counter * 255 // SCREEN_WIDTH)  # A transparência vai de 255 (totalmente opaco) a 0 (totalmente transparente)
+            # Desenhe a imagem de fade sobre a imagem de fundo
+            screen.blit(fade_image, (0, 0))
+            # Aumente o contador
+            fade_counter += 0.8
+        # chamada para exibir o menu de fim de jogo
+        game_over_menu.exibir()
 
-        key = pygame.key.get_pressed()
-        if key[pygame.K_SPACE]:
-            # reset variables
-            game_over = False
-            score = 0
-            scroll = 0
-            win = False
-            fade_counter = 0
-            # reposition jumpy
-            jumpy.rect.center = (SCREEN_WIDTH // 2, SCREEN_HEIGHT - 150)
-            # reset platforms
-            platform_group.empty()
-            # create starting platform
-            platform = Platform(SCREEN_WIDTH // 2 - 50, SCREEN_HEIGHT - 50, 100)
-            platform_group.add(platform)
-            wave.set_target_height(SCREEN_HEIGHT + 200)
-            water_scroll = 0
-            s.fill(0)
-            wave.update()
-            wave.draw(s)
-            screen.blit(s, (0, 0))
-            wave.draw_line(screen)
-            wave = Wave()
-            played = False
-            s = pygame.Surface(screen.get_size(), pygame.SRCALPHA).convert_alpha()
-            
-        key = pygame.key.get_pressed()    
-        if key[pygame.K_m]:
-            run = False
-            # retorna ao menu
+        draw_text("GAME OVER!", font_big, text_color, SCREEN_WIDTH // 2, SCREEN_HEIGHT // 2 - 100, text_outline_color, center=True)
+        draw_text("SCORE: " + str(score), font_small, text_color, SCREEN_WIDTH // 2, SCREEN_HEIGHT // 2 - 50, text_outline_color, center=True)
+        if played == False:
+            lose.play()
+            played = True
+
     # event handler
     for event in pygame.event.get():
         if event.type == pygame.QUIT:
@@ -581,3 +579,4 @@ while run:
 
 
 pygame.quit()
+
