@@ -112,6 +112,43 @@ def draw_text(text, font, text_col, x, y, outline_color, center=False, right_ali
 def draw_bg():
     screen.blit(bg_image, (0, 0))
 
+class Botao:
+    def __init__(self, x, y, largura, altura, cor, texto, acao=None):
+        self.x = x
+        self.y = y
+        self.largura = largura
+        self.altura = altura
+        self.cor = cor
+        self.cor_hover = (4, 125, 155)  # cor de destaque
+        self.texto = texto
+        self.acao = acao
+        self.played = False
+
+    def desenhar(self, tela, sprite_borda, pos_mouse):
+        sprite_borda_redimensionada = pygame.transform.scale(sprite_borda, (self.largura, self.altura))
+        tela.blit(sprite_borda_redimensionada, (self.x, self.y))
+
+        cor = self.cor
+        if self.x < pos_mouse[0] < self.x + self.largura and self.y < pos_mouse[1] < self.y + self.altura:
+            cor = self.cor_hover
+            if self.played == False:
+                self.played = True
+
+        else:
+            self.played = False
+
+        pygame.draw.rect(tela, cor, (self.x, self.y, self.largura, self.altura))
+        pygame.draw.rect(tela, text_color, (self.x, self.y, self.largura, self.altura), 2)
+
+        fonte = pygame.font.Font("assets/LuckiestGuy-Regular.ttf", 28)
+        texto = fonte.render(self.texto, True, text_color)
+        pos_texto = texto.get_rect(center=(self.x + self.largura / 2, self.y + self.altura / 2))
+        tela.blit(texto, pos_texto)
+
+    def executar_acao(self):
+        if self.acao:
+            self.acao()
+
 
 class WaterSpring:
     def __init__(self, x=0, target_height=None):
@@ -529,6 +566,8 @@ while run:
             wave = Wave()
             played = False
             s = pygame.Surface(screen.get_size(), pygame.SRCALPHA).convert_alpha()
+            
+        key = pygame.key.get_pressed()    
         if key[pygame.K_m]:
             run = False
             # retorna ao menu
