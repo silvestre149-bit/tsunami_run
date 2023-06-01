@@ -2,6 +2,7 @@
 import pygame
 import random
 import pygame.mixer
+import os
 
 Point = pygame.Vector2
 # initialise pygame
@@ -32,26 +33,47 @@ game_over = False
 fade_counter = 0
 score = 0
 
-# define colours
-WHITE = (255, 255, 255)
-BLACK = (0, 0, 0)
-
 # define font
-font_small = pygame.font.SysFont("Montserrat-Black", 20)
-font_big = pygame.font.SysFont("Montserrat-Black", 24)
+font_path = ("assets/LuckiestGuy-Regular.ttf")
+font_small = pygame.font.Font(font_path, 25)
+font_big = pygame.font.Font(font_path, 30)
 
 # load images
 jumpy_image = pygame.image.load("assets/sprite_0.png").convert_alpha()
 jumpy_image_right = pygame.image.load("assets/sprite_3.png").convert_alpha()
 jumpy_image_left = pygame.image.load("assets/sprite_2.png").convert_alpha()
-bg_image = pygame.image.load("assets/back.jpg").convert_alpha()
-# bg_image = pygame.transform.scale(bg_image, (SCREEN_WIDTH, SCREEN_HEIGHT))
+bg_image = pygame.image.load("assets/background.png").convert_alpha()
 platform_image = pygame.image.load("assets/wood.png").convert_alpha()
+pygame.mixer.music.load("assets/RUST.mp3")
+jump = pygame.mixer.Sound("assets/jump.mp3")
+death = pygame.mixer.Sound("assets/death.mp3")
+splash = pygame.mixer.Sound("assets/splash.mp3")
+jump.set_volume(1)
 
-# function for outputting text onto the screen
-def draw_text(text, font, text_col, x, y):
+text_ouline_color = (255, 150, 0)
+text_color = (255, 255, 210)
+BLACK = (0,0,0)
+
+def draw_text(text, font, text_col, x, y, center=False, outline_color=text_ouline_color):
+    # Renderiza o texto principal
     img = font.render(text, True, text_col)
-    screen.blit(img, (x, y))
+    
+    # Renderiza o contorno do texto
+    outline = font.render(text, True, outline_color)
+    
+    # Obtém o retângulo do texto para alinhar corretamente
+    rect = img.get_rect()
+    if center:
+        rect.center = (x, y)
+    else:
+        rect.topleft = (x, y)
+
+    # Desenha o contorno primeiro
+    for pos in [(rect.x-1, rect.y-1), (rect.x+1, rect.y-1), (rect.x-1, rect.y+1), (rect.x+1, rect.y+1)]:
+        screen.blit(outline, pos)
+
+    # Desenha o texto principal por cima do contorno
+    screen.blit(img, rect)
 
 
 # function for drawing the background
@@ -169,6 +191,7 @@ class Player:
             self.image = self.image_right
         if key[pygame.K_w] and self.can_jump:  # Check if the player can jump
             self.vel_y = -20  # Change this to the desired jump velocity
+            jump.play()
             self.can_jump = False  # Set can_jump to False after jumping
             score += 1 
 
@@ -234,14 +257,10 @@ class Platform(pygame.sprite.Sprite):
 
 def draw_score_and_target():
     # render score
-    score_surface = font_small.render(f'Score: {score}', font_big, WHITE)
-    score_rect = score_surface.get_rect(center=(SCREEN_WIDTH//2, 20))
-    screen.blit(score_surface, score_rect)
-    
+    draw_text(f'Score: {score}', font_small, text_color, SCREEN_WIDTH//2, 20, center=True)
     # render target
-    target_surface = font_small.render(f'Target: {target}', font_big, WHITE)
-    target_rect = target_surface.get_rect(center=(SCREEN_WIDTH//2, 50))
-    screen.blit(target_surface, target_rect)
+    draw_text(f'Target: {target}', font_small, text_color, SCREEN_WIDTH//2, 50, center=True)
+
 
 water_scroll = 0
 # player instance
@@ -261,8 +280,9 @@ run = True
 counter = 0
 win = False
 pygame.mixer.init()
-pygame.mixer.music.load("assets/RUST.mp3")
+pygame.mixer.music.set_volume(0.05)
 pygame.mixer.music.play(-1)
+
 while run:
     clock.tick(FPS)
     if game_over == False:
@@ -316,6 +336,7 @@ while run:
         water_rect = pygame.Rect(0, wave.get_target_height() - water_scroll, SCREEN_WIDTH, SCREEN_HEIGHT)
         if jumpy.rect.colliderect(water_rect):
             game_over = True
+            splash.play()
         
         if counter == 10:
             wave.add_height(acrescimo)
@@ -330,22 +351,20 @@ while run:
         # check game over
         if jumpy.rect.top > SCREEN_HEIGHT:
             game_over = True
+            death.play()
         
         draw_score_and_target()
 
     elif(win == True):
         if fade_counter < SCREEN_WIDTH:
             fade_counter += 5
-            for y in range(0, 6, 2):
+            for y in range(0, SCREEN_HEIGHT//100, 2):
                 pygame.draw.rect(screen, BLACK, (0, y * 100, fade_counter, 100))
-                pygame.draw.rect(
-                    screen,
-                    BLACK,
-                    (SCREEN_WIDTH - fade_counter, (y + 1) * 100, SCREEN_WIDTH, 100),
-                )
-        draw_text("VOCÊ VENCEU!", font_big, WHITE, 100, 200)
-        draw_text("SCORE: " + str(score), font_big, WHITE, 130, 250)
-        draw_text("APERTE ESPAÇO PARA REINICIAR", font_big, WHITE, 20, 300)
+                pygame.draw.rect(screen, BLACK, (SCREEN_WIDTH - fade_counter, (y + 1) * 100, fade_counter, 100))
+        draw_text("Você Venceu!", font_big, text_color, SCREEN_WIDTH // 2, SCREEN_HEIGHT // 2 - 100, center=True)
+        draw_text("SCORE: " + str(score), font_small, text_color, SCREEN_WIDTH // 2, SCREEN_HEIGHT // 2 - 50, center=True)
+        draw_text("Pressione ESPAÇO para reiniciar", font_small, text_color, SCREEN_WIDTH // 2, SCREEN_HEIGHT // 2, center=True)
+
         key = pygame.key.get_pressed()
         if key[pygame.K_SPACE]:
             # reset variables
@@ -373,16 +392,13 @@ while run:
     else:
         if fade_counter < SCREEN_WIDTH:
             fade_counter += 5
-            for y in range(0, 6, 2):
+            for y in range(0, SCREEN_HEIGHT//100, 2):
                 pygame.draw.rect(screen, BLACK, (0, y * 100, fade_counter, 100))
-                pygame.draw.rect(
-                    screen,
-                    BLACK,
-                    (SCREEN_WIDTH - fade_counter, (y + 1) * 100, SCREEN_WIDTH, 100),
-                )
-        draw_text("GAME OVER!", font_big, WHITE, 130, 200)
-        draw_text("SCORE: " + str(score), font_big, WHITE, 150, 250)
-        draw_text("APERTE ESPAÇO PARA REINICIAR", font_big, WHITE, 10, 300)
+                pygame.draw.rect(screen, BLACK, (SCREEN_WIDTH - fade_counter, (y + 1) * 100, fade_counter, 100))
+            draw_text("GAME OVER!", font_big, text_color, SCREEN_WIDTH // 2, SCREEN_HEIGHT // 2 - 100, center=True)
+            draw_text("SCORE: " + str(score), font_small, text_color, SCREEN_WIDTH // 2, SCREEN_HEIGHT // 2 - 50, center=True)
+            draw_text("Pressione ESPAÇO para reiniciar", font_small, text_color, SCREEN_WIDTH // 2, SCREEN_HEIGHT // 2, center=True)
+
         key = pygame.key.get_pressed()
         if key[pygame.K_SPACE]:
             # reset variables
