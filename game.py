@@ -8,8 +8,8 @@ Point = pygame.Vector2
 pygame.init()
 
 # game window dimensions
-SCREEN_WIDTH = 400
-SCREEN_HEIGHT = 600
+SCREEN_WIDTH = 450
+SCREEN_HEIGHT = 800
 
 # create game window
 screen = pygame.display.set_mode((SCREEN_WIDTH, SCREEN_HEIGHT))
@@ -310,7 +310,6 @@ while run:
         wave.points.extend(
             [Point(SCREEN_WIDTH, SCREEN_HEIGHT), Point(0, SCREEN_HEIGHT)]
         )
-        wave.draw(s)
         screen.blit(s, (0, 0))
         wave.draw_line(screen)
 
@@ -364,6 +363,13 @@ while run:
             platform_group.add(platform)
             wave.set_target_height(SCREEN_HEIGHT + 200)
             water_scroll = 0
+            s.fill(0)
+            wave.update()
+            wave.draw(s)
+            screen.blit(s, (0, 0))
+            wave.draw_line(screen)
+            wave = Wave()
+            s = pygame.Surface(screen.get_size(), pygame.SRCALPHA).convert_alpha()
     else:
         if fade_counter < SCREEN_WIDTH:
             fade_counter += 5
@@ -394,6 +400,13 @@ while run:
             platform_group.add(platform)
             wave.set_target_height(SCREEN_HEIGHT + 200)
             water_scroll = 0
+            s.fill(0)
+            wave.update()
+            wave.draw(s)
+            screen.blit(s, (0, 0))
+            wave.draw_line(screen)
+            wave = Wave()
+            s = pygame.Surface(screen.get_size(), pygame.SRCALPHA).convert_alpha()
 
     # event handler
     for event in pygame.event.get():
