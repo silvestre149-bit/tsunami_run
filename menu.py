@@ -2,19 +2,20 @@ import pygame
 from pygame.locals import *
 import pygame.mixer
 import subprocess
+import sys
 
 
 pygame.init()
 #pygame.mixer.init()
 #pygame.mixer.music.load("assets/RUST.mp3")
 #pygame.mixer.music.play(-1)
-largura_tela = 800
-altura_tela = 600
+largura_tela = 450
+altura_tela = 800
 tela = pygame.display.set_mode((largura_tela, altura_tela))
 pygame.display.set_caption("Escapando do Tsunami")
 
 cor_fundo = (0, 0, 0)  # preto
-background = pygame.image.load("assets/back_blue.jpg")
+background = pygame.image.load("assets/background.png")
 background = pygame.transform.scale(background, (largura_tela, altura_tela))
 
 
@@ -42,7 +43,7 @@ class Botao:
         pygame.draw.rect(tela, cor, (self.x, self.y, self.largura, self.altura))
         pygame.draw.rect(tela, cor_fundo, (self.x, self.y, self.largura, self.altura), 2)
 
-        fonte = pygame.font.Font("assets/Montserrat-Black.ttf", 28)
+        fonte = pygame.font.Font("assets/LuckiestGuy-Regular.ttf", 28)
         texto = fonte.render(self.texto, True, cor_fundo)
         pos_texto = texto.get_rect(center=(self.x + self.largura / 2, self.y + self.altura / 2))
         tela.blit(texto, pos_texto)
@@ -68,10 +69,11 @@ def tratar_eventos_menu(botoes):
         botao.desenhar(tela, sprite_borda, pos_mouse)  # passar a posição do mouse para o método desenhar do botão
 
 def iniciar_jogo():
-    print("Iniciando o jogo...")
-    subprocess.call(["python", "game.py"])
-
-
+    # Executa o arquivo game.py
+    subprocess.call([sys.executable, "game.py"])
+    # Fecha o menu.py
+    sys.exit()
+    
 def mostrar_como_jogar():
     print("Como jogar...")
 
@@ -82,10 +84,10 @@ def exibir_menu():
     botoes = []
     sprite_borda = pygame.image.load("assets/Button.png")  # Carregar a imagem da sprite de borda
 
-    botao_iniciar = Botao(300, 200, 200, 50, cor_texto, "Iniciar Jogo", exibir_menu_niveis)
-    botao_como_jogar = Botao(300, 275, 200, 50, cor_texto, "Como Jogar", mostrar_como_jogar)
-    botao_sobre = Botao(300, 350, 200, 50, cor_texto, "Sobre", mostrar_sobre)
-    botao_sair = Botao(300, 425, 200, 50, cor_texto, "Sair", pygame.quit)
+    botao_iniciar = Botao(125, 200, 200, 50, cor_texto, "Iniciar Jogo", exibir_menu_niveis)
+    botao_como_jogar = Botao(125, 275, 200, 50, cor_texto, "Como Jogar", mostrar_como_jogar)
+    botao_sobre = Botao(125, 350, 200, 50, cor_texto, "Sobre", mostrar_sobre)
+    botao_sair = Botao(125, 425, 200, 50, cor_texto, "Sair", pygame.quit)
 
     botoes.append(botao_iniciar)
     botoes.append(botao_como_jogar)
@@ -99,7 +101,7 @@ def exibir_menu():
     while True:
         tratar_eventos_menu(botoes)
         tela.blit(background, (0, 0))  # Desenha a imagem de fundo na tela
-        tela.blit(sprite_fundo, (250, 150))  # Desenha a sprite de fundo atrás dos botões
+        tela.blit(sprite_fundo, (75, 150))  # Desenha a sprite de fundo atrás dos botões
         for botao in botoes:
             botao.desenhar(tela, sprite_borda, pygame.mouse.get_pos())  # Passar a posição do mouse para o método desenhar do botão
         pygame.display.update()
@@ -108,10 +110,10 @@ def exibir_menu_niveis():
     botoes_niveis = []
     sprite_borda = pygame.image.load("assets/Button.png")  # Carregar a imagem da sprite de borda
 
-    botao_nivel1 = Botao(300, 200, 200, 50, cor_texto, "Nível 1", iniciar_jogo)
-    botao_nivel2 = Botao(300, 275, 200, 50, cor_texto, "Nível 2", iniciar_jogo)
-    botao_nivel3 = Botao(300, 350, 200, 50, cor_texto, "Nível 3", iniciar_jogo)
-    botao_voltar = Botao(300, 425, 200, 50, cor_texto, "Voltar", exibir_menu)
+    botao_nivel1 = Botao(125, 200, 200, 50, cor_texto, "Nível 1", iniciar_jogo)
+    botao_nivel2 = Botao(125, 275, 200, 50, cor_texto, "Nível 2", iniciar_jogo)
+    botao_nivel3 = Botao(125, 350, 200, 50, cor_texto, "Nível 3", iniciar_jogo)
+    botao_voltar = Botao(125, 425, 200, 50, cor_texto, "Voltar", exibir_menu)
 
     botoes_niveis.append(botao_nivel1)
     botoes_niveis.append(botao_nivel2)
@@ -125,7 +127,7 @@ def exibir_menu_niveis():
     while True:
         tratar_eventos_menu(botoes_niveis)
         tela.blit(background, (0, 0))  # Desenha a imagem de fundo na tela
-        tela.blit(sprite_fundo, (250, 150))  # Desenha a sprite de fundo atrás dos botões
+        tela.blit(sprite_fundo, (75, 150))  # Desenha a sprite de fundo atrás dos botões
         for botao in botoes_niveis:
             botao.desenhar(tela, sprite_borda, pygame.mouse.get_pos())  # Passar a posição do mouse para o método desenhar do botão
         pygame.display.update()
