@@ -14,7 +14,7 @@ SCREEN_HEIGHT = 800
 
 # create game window
 screen = pygame.display.set_mode((SCREEN_WIDTH, SCREEN_HEIGHT))
-pygame.display.set_caption("Jumpy")
+pygame.display.set_caption("Tsunami Run")
 
 # set frame rate
 clock = pygame.time.Clock()
@@ -28,10 +28,24 @@ SCROLL_THRESH = 200
 GRAVITY = 1
 MAX_PLATFORMS = 10
 scroll = 0
-bg_scroll = 0
 game_over = False
 fade_counter = 0
 score = 0
+scale = 1.5
+
+#spritesheet
+spritesheet = pygame.image.load('assets/spritesheet.png')
+
+sprite_width = 32
+sprite_height = 32
+sprites = []
+
+for j in range(spritesheet.get_height() // sprite_height):
+    for i in range(spritesheet.get_width() // sprite_width):
+        rect = pygame.Rect(i * sprite_width, j * sprite_height, sprite_width, sprite_height)
+        sprite = spritesheet.subsurface(rect)
+        sprite = pygame.transform.scale(sprite, (sprite_width*scale, sprite_height*scale))
+        sprites.append(sprite)
 
 # define font
 font_path = ("assets/LuckiestGuy-Regular.ttf")
@@ -39,11 +53,10 @@ font_small = pygame.font.Font(font_path, 25)
 font_big = pygame.font.Font(font_path, 30)
 
 # load images
-jumpy_image = pygame.image.load("assets/sprite_0.png").convert_alpha()
-jumpy_image_right = pygame.image.load("assets/sprite_3.png").convert_alpha()
-jumpy_image_left = pygame.image.load("assets/sprite_2.png").convert_alpha()
 bg_image = pygame.image.load("assets/background.png").convert_alpha()
-platform_image = pygame.image.load("assets/wood.png").convert_alpha()
+bg_image = pygame.transform.scale(bg_image, (SCREEN_WIDTH, SCREEN_HEIGHT))
+platform_image = pygame.image.load("assets/bricks.jpg").convert_alpha()
+platform_image = pygame.transform.scale(platform_image, (SCREEN_WIDTH, SCREEN_HEIGHT))
 pygame.mixer.music.load("assets/RUST.mp3")
 jump = pygame.mixer.Sound("assets/jump.mp3")
 death = pygame.mixer.Sound("assets/death.mp3")
@@ -77,9 +90,8 @@ def draw_text(text, font, text_col, x, y, center=False, outline_color=text_oulin
 
 
 # function for drawing the background
-def draw_bg(bg_scroll):
-    screen.blit(bg_image, (0, 0 + bg_scroll))
-    screen.blit(bg_image, (0, -600 + bg_scroll))
+def draw_bg():
+    screen.blit(bg_image, (0, 0))
 
 
 class WaterSpring:
@@ -165,15 +177,28 @@ class Wave:
 
 class Player:
     def __init__(self, x, y):
-        self.image_right = pygame.transform.scale(jumpy_image_right, (45, 45))
-        self.image_left = pygame.transform.scale(jumpy_image_left, (45, 45))
-        self.image = self.image_right  # Default image
+        self.sprite_stand = [sprites[11]]
+        self.sprites_right = sprites[1:4]
+        self.sprites_left = [pygame.transform.flip(sprite, True, False) for sprite in self.sprites_right]
+        self.sprites_jump_start_right = [sprites[4]]
+        self.sprites_jump_start_left = [pygame.transform.flip(sprite, True, False) for sprite in self.sprites_jump_start_right]
+        self.sprites_jump_air_right = [sprites[5]]
+        self.sprites_jump_air_left = [pygame.transform.flip(sprite, True, False) for sprite in self.sprites_jump_air_right]
+        self.sprites_jump_fall_right = [sprites[6]]
+        self.sprites_jump_fall_left = [pygame.transform.flip(sprite, True, False) for sprite in self.sprites_jump_fall_right]
+        self.sprites_jump_land = [sprites[7]]
+        self.image = self.sprite_stand[0]  # Imagem padrão é a sprite parado
+        self.current_sprite_list = self.sprite_stand
+        self.current_sprite_index = 0
         self.width = 25
         self.height = 40
         self.rect = pygame.Rect(0, 0, self.width, self.height)
         self.rect.center = (x, y)
         self.vel_y = 0
+        self.last_direction = 'right'  # Armazene a última direção que o personagem se moveu
         self.can_jump = False  # Initialize the can_jump variable
+        self.jumping = False
+        self.falling = False
 
     def move(self):
         # reset variables
@@ -185,16 +210,52 @@ class Player:
         key = pygame.key.get_pressed()
         if key[pygame.K_a]:
             dx = -10
-            self.image = self.image_left
-        if key[pygame.K_d]:
+            self.current_sprite_list = self.sprites_left
+            self.last_direction = 'left'  # Atualize a última direção
+        elif key[pygame.K_d]:
             dx = 10
-            self.image = self.image_right
-        if key[pygame.K_w] and self.can_jump:  # Check if the player can jump
+            self.current_sprite_list = self.sprites_right
+            self.last_direction = 'right'  # Atualize a última direção
+        elif key[pygame.K_w] and self.can_jump:  # Check if the player can jump
             self.vel_y = -20  # Change this to the desired jump velocity
             jump.play()
             self.can_jump = False  # Set can_jump to False after jumping
+            self.jumping = True
             score += 1 
+        else:
+            # Se o jogador não estiver se movendo, use a última direção para determinar para qual direção olhar
+            if self.last_direction == 'left':
+                self.current_sprite_list = [pygame.transform.flip(self.sprite_stand[0], True, False)]
+            else:
+                self.current_sprite_list = self.sprite_stand
 
+        # If player is jumping
+        if self.jumping:
+            if self.last_direction == 'right':
+                self.current_sprite_list = self.sprites_jump_start_right
+            if self.last_direction == 'left':
+                self.current_sprite_list = self.sprites_jump_start_left
+            if self.vel_y < 0 and self.last_direction == 'right':
+                self.current_sprite_list = self.sprites_jump_air_right
+            elif self.vel_y < 0 and self.last_direction == 'left':
+                self.current_sprite_list = self.sprites_jump_air_left
+            elif self.vel_y > 0 and self.last_direction == 'right':
+                self.falling = True
+                self.current_sprite_list = self.sprites_jump_fall_right
+            elif self.vel_y > 0 and self.last_direction == 'left':
+                self.falling = True
+                self.current_sprite_list = self.sprites_jump_fall_left
+        # If player is falling
+        if self.falling and self.can_jump:
+            self.current_sprite_list = self.sprites_jump_land
+            self.jumping = False
+            self.falling = False
+
+        self.current_sprite_index += 1
+        self.current_sprite_index %= len(self.current_sprite_list)  # Certifique-se de que o índice está sempre dentro do intervalo
+
+        self.image = self.current_sprite_list[self.current_sprite_index]
+        
         # gravity
         if not self.can_jump:
             self.vel_y += GRAVITY
@@ -214,6 +275,7 @@ class Player:
                         self.can_jump = True  # Set can_jump to True if the player is on a platform
                 else:
                     self.can_jump = False  # Set can_jump to False if the player is not on a platform
+
 
         # ensure player doesn't go off the edge of the screen
         if self.rect.left + dx < 0:
@@ -290,10 +352,7 @@ while run:
         score += score_temp
         water_scroll -= scroll
         # draw background
-        bg_scroll += scroll
-        if bg_scroll >= 600:
-            bg_scroll = 0
-        draw_bg(bg_scroll)
+        draw_bg()
 
         if random.random() < 0.01:  # 1% chance each frame
             # Generate a random index for the left side of the screen
