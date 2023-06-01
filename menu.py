@@ -80,8 +80,24 @@ def tratar_eventos_menu(botoes):
     for botao in botoes:
         botao.desenhar(tela, sprite_borda, pos_mouse)  # passar a posição do mouse para o método desenhar do botão
 
-def iniciar_jogo():
-    dificuldade = ['10', '-10', '(0,0,255,50)']
+def iniciar_jogo1():
+    dificuldade = ['30', '-5', '(0,255,255,50)']
+    # Executa o arquivo game.py
+    pygame.mixer.music.stop()
+    subprocess.run([sys.executable, "game.py"] + dificuldade)
+    pygame.mixer.music.play()
+    # Fecha o menu.py
+
+def iniciar_jogo2():
+    dificuldade = ['50', '-10', '(0,0,255,50)']
+    # Executa o arquivo game.py
+    pygame.mixer.music.stop()
+    subprocess.run([sys.executable, "game.py"] + dificuldade)
+    pygame.mixer.music.play()
+    # Fecha o menu.py
+
+def iniciar_jogo3():
+    dificuldade = ['100', '-15', '(255,0,0,50)']
     # Executa o arquivo game.py
     pygame.mixer.music.stop()
     subprocess.run([sys.executable, "game.py"] + dificuldade)
@@ -124,9 +140,9 @@ def exibir_menu_niveis():
     botoes_niveis = []
     sprite_borda = pygame.image.load("assets/Button.png")  # Carregar a imagem da sprite de borda
 
-    botao_nivel1 = Botao(125, 200, 200, 50, cor_texto, "Nível 1", iniciar_jogo)
-    botao_nivel2 = Botao(125, 275, 200, 50, cor_texto, "Nível 2", iniciar_jogo)
-    botao_nivel3 = Botao(125, 350, 200, 50, cor_texto, "Nível 3", iniciar_jogo)
+    botao_nivel1 = Botao(125, 200, 200, 50, cor_texto, "Nível 1", iniciar_jogo1)
+    botao_nivel2 = Botao(125, 275, 200, 50, cor_texto, "Nível 2", iniciar_jogo2)
+    botao_nivel3 = Botao(125, 350, 200, 50, cor_texto, "Nível 3", iniciar_jogo3)
     botao_voltar = Botao(125, 425, 200, 50, cor_texto, "Voltar", exibir_menu)
 
     botoes_niveis.append(botao_nivel1)
