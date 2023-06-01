@@ -81,10 +81,12 @@ def tratar_eventos_menu(botoes):
         botao.desenhar(tela, sprite_borda, pos_mouse)  # passar a posição do mouse para o método desenhar do botão
 
 def iniciar_jogo():
+    dificuldade = ['10', '-10', '(0,0,255,50)']
     # Executa o arquivo game.py
-    subprocess.call([sys.executable, "game.py"])
+    pygame.mixer.music.stop()
+    subprocess.run([sys.executable, "game.py"] + dificuldade)
+    pygame.mixer.music.play()
     # Fecha o menu.py
-    sys.exit()
     
 def mostrar_como_jogar():
     print("Como jogar...")

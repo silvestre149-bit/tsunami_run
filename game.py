@@ -1,4 +1,4 @@
-# import libraries
+import sys
 import pygame
 import random
 import pygame.mixer
@@ -7,6 +7,14 @@ import subprocess
 Point = pygame.Vector2
 # initialise pygame
 pygame.init()
+
+target = int(sys.argv[1])
+acrescimo = int(sys.argv[2])
+cor_agua = eval(sys.argv[3])
+
+# target = 10
+# acrescimo = -10
+# cor_agua = (0,0,255,200)
 
 # game window dimensions
 SCREEN_WIDTH = 450
@@ -20,8 +28,6 @@ pygame.display.set_caption("Tsunami Run")
 clock = pygame.time.Clock()
 FPS = 45
 
-target = 10
-acrescimo = -10
 
 # game variables
 SCROLL_THRESH = 200
@@ -162,7 +168,7 @@ class Wave:
         )
 
     def draw(self, surf: pygame.Surface):
-        pygame.draw.polygon(surf, (0, 0, 255, 50), self.points)
+        pygame.draw.polygon(surf, cor_agua, self.points)
 
     def draw_line(self, surf: pygame.Surface):
         pygame.draw.lines(surf, "white", False, self.points[:-2], 5)
@@ -408,20 +414,22 @@ while run:
             platform_group.add(platform)
         # update platforms
         platform_group.update(scroll)
-
         # draw sprites
         platform_group.draw(screen)
-        s.fill(0)
+
         wave.update()
 
         wave.points = [Point(i.x, i.height - water_scroll) for i in wave.springs]
         wave.points.extend(
             [Point(SCREEN_WIDTH, SCREEN_HEIGHT), Point(0, SCREEN_HEIGHT)]
         )
+
+        s.fill(0)
+        wave.draw(s)  # Adicione esta linha
         screen.blit(s, (0, 0))
         wave.draw_line(screen)
-
         water_rect = pygame.Rect(0, wave.get_target_height() - water_scroll, SCREEN_WIDTH, SCREEN_HEIGHT)
+
         if jumpy.rect.colliderect(water_rect):
             game_over = True
             splash.play()
@@ -522,7 +530,6 @@ while run:
             played = False
             s = pygame.Surface(screen.get_size(), pygame.SRCALPHA).convert_alpha()
         if key[pygame.K_m]:
-            subprocess.call(["python", "menu.py"])
             run = False
             # retorna ao menu
     # event handler
